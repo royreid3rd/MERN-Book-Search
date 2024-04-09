@@ -1,6 +1,6 @@
 // Load the Mongoose ORM
 const mongoose = require('mongoose');
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://Royreid3rd:mymongodbpassword@cluster0.28ltw2v.mongodb.net/');
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/googlebooks');
 
 module.exports = mongoose.connection;
