@@ -4,6 +4,7 @@ import decode from 'jwt-decode';
 
 
 
+// create a new class to instantiate for a user
 class AuthService {
   // get user data
   getProfile() {
@@ -11,21 +12,20 @@ class AuthService {
   }
 
   // check if user's logged in
-  async loggedIn() {
-    try {
-      const { data } = await client.query({
-        query: gql`
-          query CheckAuth {
-            checkAuth {
-              isAuthenticated
-            }
-          }
-        `,
-      });
+  loggedIn() {
+    // Checks if there is a saved token and it's still valid
+    const token = this.getToken();
+    return !!token && !this.isTokenExpired(token); // handwaiving here
+  }
 
-      return data.checkAuth.isAuthenticated;
-    } catch (error) {
-      console.error('Error checking authentication status:', error);
+  // check if token is expired
+  isTokenExpired(token) {
+    try {
+      const decoded = decode(token);
+      if (decoded.exp < Date.now() / 1000) {
+        return true;
+      } else return false;
+    } catch (err) {
       return false;
     }
   }
@@ -35,25 +35,10 @@ class AuthService {
     return localStorage.getItem('id_token');
   }
 
-  async login(email, password) {
-    try {
-      const { data } = await client.mutate({
-        mutation: gql`
-          mutation LoginUser($email: String!, $password: String!) {
-            login(email: $email, password: $password) {
-              token
-            }
-          }
-        `,
-        variables: { email, password },
-      });
-
-      const token = data.login.token;
-      localStorage.setItem('id_token', token);
-      window.location.assign('/');
-    } catch (error) {
-      console.error('Login failed:', error);
-    }
+  login(idToken) {
+    // Saves user token to localStorage
+    localStorage.setItem('id_token', idToken);
+    window.location.assign('/');
   }
 
   logout() {
